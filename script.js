@@ -32,23 +32,24 @@ const history = {
   },
 
   updateInputDisplay(output) {
-    //NOTE: Input display can hold 10 characters, history can hold 18 characters
+    // NOTE: Input display can hold 10 characters
     const currentlyDisplayed = inputDisplay.textContent;
 
     if(this.hasPower) {
-      // TODO: allow reset when 9 numbers are displayed.
-      if (currentlyDisplayed.length < 9) {
-        if (this.hasCalculated) {
-          this.hasCalculated = false;
+      if (this.hasCalculated) {
+        this.hasCalculated = false;
 
-          if (output === ".") {
-            inputDisplay.textContent += "0.";
-          } else {
-            inputDisplay.textContent = output;
-          }
-        } else if (output === "." && !currentlyDisplayed.includes(".")) {
-          inputDisplay.textContent += output;
+        if (output === ".") {
+          inputDisplay.textContent = "0.";
         } else {
+          inputDisplay.textContent = output;
+        }
+      } else if (currentlyDisplayed.length < 9) {
+        const numbers = /[\d]/;
+
+        if (numbers.test(output)) {
+          inputDisplay.textContent += output;
+        } else if (output === "." && !inputDisplay.textContent.includes(".")) {
           inputDisplay.textContent += output;
         }
       }
@@ -56,7 +57,17 @@ const history = {
   },
 
   updateHistoryDisplay() {
-    historyDisplay.textContent = this.userInputRecord.join("");
+    // NOTE: history can hold 21 characters
+
+    let startIndexOfShortList = -10;
+    let shortenedHistoryList = this.userInputRecord;
+    
+    while (shortenedHistoryList.join(" ").length > 21) {
+      shortenedHistoryList = shortenedHistoryList.slice(startIndexOfShortList);
+      startIndexOfShortList++;
+    }
+    
+    historyDisplay.textContent = shortenedHistoryList.join(" ");
   },
 
   resolve(firstNumber, operator, secondNumber) {
@@ -65,13 +76,17 @@ const history = {
         this.lastResult = ((firstNumber*10000000) + (secondNumber*10000000))/10000000;
       break;
       case "-":
-        this.lastResult = firstNumber - secondNumber;
+        this.lastResult = ((firstNumber*10000000) - (secondNumber*10000000))/10000000;
       break;
       case "X":
         this.lastResult = firstNumber * secondNumber;
       break;
       case "/":
-        this.lastResult = firstNumber / secondNumber;
+        if (secondNumber === 0) {
+          this.lastResult = 0;
+        } else {
+          this.lastResult = firstNumber / secondNumber;
+        }
       break;
     }
   },
@@ -94,7 +109,7 @@ const history = {
         
         this.resolve(this.lastResult, previousOperator, currentlyDisplayed);
         
-        inputDisplay.textContent = this.lastResult;
+        inputDisplay.textContent = Number(this.lastResult.toString().substring(0,9));
         
         if (operators.includes(operator)) {
           this.userInputRecord.push(operator);
@@ -149,5 +164,8 @@ deleteBtn.addEventListener("click", () => {
     inputArray.pop();
     inputDisplay.textContent = inputArray.join("");
   }
+})
+negativeBtn.addEventListener("click", ()=>{
+  inputDisplay.textContent = (Number(inputDisplay.textContent) * -1);
 })
 body.addEventListener("click", checkButtonPressed);

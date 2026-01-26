@@ -40,7 +40,6 @@ h1, p {
   border-radius: 10px;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
 }
 
 #history {
@@ -51,6 +50,7 @@ h1, p {
   text-align: right;
   font-family: Impact, 'Arial Narrow Bold', sans-serif;
   font-size: 3em;
+  overflow: hidden;
 }
 
 #input {
