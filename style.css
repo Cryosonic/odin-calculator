@@ -142,3 +142,11 @@ h1, p {
 .number {
   background-image: linear-gradient(90deg, rgb(150, 150, 150), rgb(200, 200, 200), rgb(150, 150, 150));
 }
+
+footer {
+  margin: 40px auto;
+  width: 500px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}

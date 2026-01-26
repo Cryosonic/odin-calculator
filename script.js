@@ -62,12 +62,12 @@ const history = {
     let startIndexOfShortList = -10;
     let shortenedHistoryList = this.userInputRecord;
     
-    while (shortenedHistoryList.join(" ").length > 21) {
+    while (shortenedHistoryList.join("").length > 18) {
       shortenedHistoryList = shortenedHistoryList.slice(startIndexOfShortList);
       startIndexOfShortList++;
     }
     
-    historyDisplay.textContent = shortenedHistoryList.join(" ");
+    historyDisplay.textContent = shortenedHistoryList.join("");
   },
 
   resolve(firstNumber, operator, secondNumber) {
@@ -92,41 +92,43 @@ const history = {
   },
 
   calculate(operator) {
-    // TODO: enter sign is not input after first number entry
-
     if(this.hasPower || !this.hasCalculated) {
+      const operators = ["+", "-", "/", "X"];
       const currentlyDisplayed = Number(inputDisplay.textContent);
-      this.userInputRecord.push(currentlyDisplayed);
-      this.hasCalculated = true;
 
-      if (this.userInputRecord.length < 3) {
-        this.lastResult = currentlyDisplayed;
-        this.userInputRecord.push(operator);
-        this.updateHistoryDisplay();
-      } else if (this.userInputRecord.length >= 3) {
-        const operators = ["+", "-", "/", "X"];
-        const previousOperator = this.userInputRecord[this.userInputRecord.length-2];
-        
-        this.resolve(this.lastResult, previousOperator, currentlyDisplayed);
-        
-        inputDisplay.textContent = Number(this.lastResult.toString().substring(0,9));
-        
+      if (this.userInputRecord.length < 1) {
         if (operators.includes(operator)) {
-          this.userInputRecord.push(operator);
+          this.userInputRecord.push(currentlyDisplayed);
+          this.updateHistoryDisplay();
+          this.userInputRecord.push(operator)
+          this.lastResult = currentlyDisplayed;
+          this.hasCalculated = true;
         }
+      } else if (this.userInputRecord.length > 1) {
+        if (operators.includes(operator) || operator === "=") {
+          this.userInputRecord.push(currentlyDisplayed);
+          this.updateHistoryDisplay();
+          const previousOperator = this.userInputRecord[this.userInputRecord.length-2];
+          this.resolve(this.lastResult, previousOperator, currentlyDisplayed);
 
-        this.updateHistoryDisplay();
+          if (operators.includes(operator)) {
+            this.userInputRecord.push(operator);
+          }
+          
+          // NOTE: Input display can hold 10 characters
+          inputDisplay.textContent = Number(this.lastResult.toString().substring(0,10));
 
-        if (operator === "=") {
-          this.userInputRecord = [];
-          this.lastResult = 0;
+          if (operator === "=") {
+            this.userInputRecord = [];
+            this.lastResult = 0;
+          }
+
+          this.hasCalculated = true;
         }
       }
     }
   },
 }
-
-
 
 const generateBody = () => {
   btnArray.forEach(num=>{
