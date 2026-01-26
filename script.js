@@ -22,35 +22,39 @@ const history = {
     this.hasPower = true;
     this.hasCalculated = true;
     historyDisplay.textContent = "";
-    inputDisplay.textContent = 0;
+    inputDisplay.value = 0;
+    if(inputDisplay.hasAttribute("disabled")) {
+      inputDisplay.removeAttribute("disabled");
+    };
   },
 
   powerOff() {
     this.hasPower = false;
     historyDisplay.textContent = "";
-    inputDisplay.textContent = "";
+    inputDisplay.value = "";
+    inputDisplay.setAttribute("disabled", "true");
   },
 
   updateInputDisplay(output) {
     // NOTE: Input display can hold 10 characters
-    const currentlyDisplayed = inputDisplay.textContent;
+    const currentlyDisplayed = inputDisplay.value;
 
     if(this.hasPower) {
       if (this.hasCalculated) {
         this.hasCalculated = false;
 
         if (output === ".") {
-          inputDisplay.textContent = "0.";
+          inputDisplay.value = "0.";
         } else {
-          inputDisplay.textContent = output;
+          inputDisplay.value = output;
         }
       } else if (currentlyDisplayed.length < 9) {
         const numbers = /[\d]/;
 
         if (numbers.test(output)) {
-          inputDisplay.textContent += output;
-        } else if (output === "." && !inputDisplay.textContent.includes(".")) {
-          inputDisplay.textContent += output;
+          inputDisplay.value += output;
+        } else if (output === "." && !inputDisplay.value.includes(".")) {
+          inputDisplay.value += output;
         }
       }
     }
@@ -92,9 +96,9 @@ const history = {
   },
 
   calculate(operator) {
-    if(this.hasPower || !this.hasCalculated) {
-      const operators = ["+", "-", "/", "X"];
-      const currentlyDisplayed = Number(inputDisplay.textContent);
+    if(this.hasPower && !this.hasCalculated) {
+      const operators = ["+", "-", "/", "X", "*"];
+      const currentlyDisplayed = Number(inputDisplay.value);
 
       if (this.userInputRecord.length < 1) {
         if (operators.includes(operator)) {
@@ -116,7 +120,7 @@ const history = {
           }
           
           // NOTE: Input display can hold 10 characters
-          inputDisplay.textContent = Number(this.lastResult.toString().substring(0,10));
+          inputDisplay.value = Number(this.lastResult.toString().substring(0,10));
 
           if (operator === "=") {
             this.userInputRecord = [];
@@ -144,13 +148,26 @@ const generateBody = () => {
 }
 
 const checkButtonPressed = (e) => {
-  const operators = ["+", "-", "/", "X", "="];
-  const buttonPressed = e.target.id;
+  const operators = ["+", "-", "/", "X", "=", "*", "Enter"];
+  let buttonPressed = "";
+  if (e.type === "keypress") {
+    if (isNaN(e.key) && e.key !== ".") {
+      buttonPressed = e.key;
+    }
+  } else if (e.type === "click") {
+    buttonPressed = e.target.id;
+  }
 
   if (!isNaN(buttonPressed) || buttonPressed === ".") {
     history.updateInputDisplay(buttonPressed);
-  } else if (operators.includes(buttonPressed)){
-    history.calculate(buttonPressed);
+  } else if (operators.includes(buttonPressed)) {
+    if (buttonPressed === "Enter") {
+      history.calculate("=");
+    } else if (buttonPressed === "*") {
+      history.calculate("X")
+    } else {
+      history.calculate(buttonPressed);
+    }
   }
 }
 
@@ -158,16 +175,17 @@ generateBody();
 clearBtn.addEventListener("click", ()=>{history.clearDisplay()});
 offBtn.addEventListener("click", history.powerOff);
 deleteBtn.addEventListener("click", () => {
-  const inputArray = inputDisplay.textContent.split("")
+  const inputArray = inputDisplay.value.split("")
   if(inputArray.length === 1) {
-    inputDisplay.textContent = "0";
+    inputDisplay.value = "0";
     history.hasCalculated = true;
   } else {
     inputArray.pop();
-    inputDisplay.textContent = inputArray.join("");
+    inputDisplay.value = inputArray.join("");
   }
 })
 negativeBtn.addEventListener("click", ()=>{
   inputDisplay.textContent = (Number(inputDisplay.textContent) * -1);
 })
 body.addEventListener("click", checkButtonPressed);
+inputDisplay.addEventListener("keypress", checkButtonPressed);

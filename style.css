@@ -56,7 +56,10 @@ h1, p {
 #input {
   width: 500px;
   height: 60%;
+  outline: transparent;
   margin: auto;
+  border: none;
+  background-color: rgb(220, 220, 220);;
   padding: 0 20px;
   text-align: right;
   font-family: Courier, monospace;
